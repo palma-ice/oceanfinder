@@ -55,9 +55,9 @@ program ocean
     
     ! Determine open-ocean mask for our domain 
     call find_ocean(mask_ocn,f_grnd,mask_ocn_ref)
-
+    
     ! Write output to file 
-    call write_ocn(file_out,file_in,f_grnd,mask_ocn_ref,mask_ocn,xc,yc)
+    call write_ocn(file_out,f_grnd,mask_ocn_ref,mask_ocn,xc,yc)
 
 contains 
 
@@ -111,30 +111,34 @@ if (.TRUE.) then
             
             if (mask(i,j) .eq. 1) then 
                 ! This is an open-ocean point 
-
-                mask_neighb   = [mask(im1,j),mask(ip1,j),mask(i,jm1),mask(i,jp1)]
-
-                if (count(mask_neighb .eq. -1) .gt. 0) then 
-                    ! An ocean neighbor exists
-
-                    ! Log additional case found on this iteration
+                ! Define any neighbor ocean points as open-ocean points
+                
+                if (mask(im1,j) .eq. -1) then 
+                    mask(im1,j) = 1
                     n_unfilled = n_unfilled + 1
-
-                    ! Define any neighbor ocean points as open-ocean points
-                    if (mask(im1,j) .eq. -1) mask(im1,j) = 1 
-                    if (mask(i,jm1) .eq. -1) mask(i,jm1) = 1 
-                    if (mask(i,jp1) .eq. -1) mask(i,jp1) = 1 
-                    
-                    !if (mask(ip1,j) .eq. -1) mask(ip1,j) = 1 
-                    
                 end if 
 
-            end if 
+                if (mask(ip1,j) .eq. -1) then 
+                    mask(ip1,j) = 1 
+                    n_unfilled = n_unfilled + 1
+                end if
 
+                if (mask(i,jm1) .eq. -1) then 
+                    mask(i,jm1) = 1 
+                    n_unfilled = n_unfilled + 1
+                end if 
+
+                if (mask(i,jp1) .eq. -1) then 
+                    mask(i,jp1) = 1 
+                    n_unfilled = n_unfilled + 1
+                end if 
+
+            end if
+                
         end do 
         end do  
 
-        write(*,*) q, n_unfilled 
+        write(*,*) q, n_unfilled, count(mask .eq. -1) 
 
         ! Exit loop if no more open-ocean points are found 
         if (n_unfilled .eq. 0) exit 
@@ -247,12 +251,11 @@ subroutine define_ocn_ref(mask,xc,yc,domain)
 
 end subroutine define_ocn_ref
 
-subroutine write_ocn(filename,file_in,f_grnd,mask_ref,mask,xc,yc)
+subroutine write_ocn(filename,f_grnd,mask_ref,mask,xc,yc)
 
     implicit none 
 
-    character(len=512), intent(IN)  :: filename 
-    character(len=512), intent(IN)  :: file_in  
+    character(len=512), intent(IN)  :: filename  
     real(prec),         intent(IN)  :: f_grnd(:,:) 
     integer,            intent(IN)  :: mask_ref(:,:)
     integer,            intent(IN)  :: mask(:,:) 
