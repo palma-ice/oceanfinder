@@ -76,9 +76,7 @@ subroutine find_ocean(mask,f_grnd,mask_ref)
     integer :: i, j, q, nx, ny
     integer :: im1, ip1, jm1, jp1 
     integer :: n_unfilled 
-
-    integer    :: mask_neighb(4) 
-
+    
     integer, parameter :: qmax = 1000 
 
     nx = size(mask,1)
